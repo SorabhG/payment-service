@@ -1,6 +1,5 @@
 package com.example.paymentservice.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,16 +9,17 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CardPaymentDetails {
+
     @Id
     @GeneratedValue
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "payment_id")
+    @JoinColumn(name = "payment_id", nullable = false)
     private Payment payment;
 
     @Column(nullable = false)
-    private String cardNumber; // Store masked version
+    private String cardNumber;
 
     @Column(nullable = false)
     private String cardHolderName;
@@ -30,7 +30,6 @@ public class CardPaymentDetails {
     @Column(nullable = false)
     private Integer expiryYear;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 3)
     private String cvv;
 }
-

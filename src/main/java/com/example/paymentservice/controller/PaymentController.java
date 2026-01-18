@@ -7,6 +7,7 @@ import com.example.paymentservice.dto.PaymentResponse;
 import com.example.paymentservice.entity.enums.PaymentStatus;
 import com.example.paymentservice.service.PaymentService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,17 +27,20 @@ public class PaymentController {
     @PreAuthorize("hasAuthority('SCOPE_payment.write')")
     @PostMapping("/card")
     public ResponseEntity<PaymentResponse> createCardPayment(
+            @RequestHeader("Idempotency-Key") @NotBlank String idempotencyKey,
             @RequestBody @Valid CardPaymentRequest request) {
-        return ResponseEntity.ok(paymentService.createCardPayment(request));
+        return ResponseEntity.ok(paymentService.createCardPayment(request,idempotencyKey));
     }
 
     // CREATE – Bank
+    // CREATE – Bank Payment
+    @PreAuthorize("hasAuthority('SCOPE_payment.write')")
     @PostMapping("/bank")
     public ResponseEntity<PaymentResponse> createBankPayment(
+            @RequestHeader("Idempotency-Key") @NotBlank String idempotencyKey,
             @RequestBody @Valid BankPaymentRequest request) {
-        return ResponseEntity.ok(paymentService.createBankPayment(request));
+        return ResponseEntity.ok(paymentService.createBankPayment(request, idempotencyKey));
     }
-
     // READ – by ID
     @GetMapping("/{id}")
     public ResponseEntity<PaymentResponse> getPaymentById(@PathVariable UUID id) {

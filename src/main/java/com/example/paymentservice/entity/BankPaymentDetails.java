@@ -1,6 +1,5 @@
 package com.example.paymentservice.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,12 +9,13 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class BankPaymentDetails {
+
     @Id
     @GeneratedValue
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "payment_id")
+    @JoinColumn(name = "payment_id", nullable = false)
     private Payment payment;
 
     @Column(nullable = false)

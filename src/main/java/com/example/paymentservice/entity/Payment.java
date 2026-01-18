@@ -1,6 +1,5 @@
 package com.example.paymentservice.entity;
 
-
 import com.example.paymentservice.entity.enums.PaymentStatus;
 import com.example.paymentservice.entity.enums.PaymentType;
 import jakarta.persistence.*;
@@ -15,6 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class Payment {
+
     @Id
     @GeneratedValue
     @Column(updatable = false, nullable = false)
@@ -34,5 +34,18 @@ public class Payment {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-}
 
+    // ✅ New field for idempotency
+    @Column(unique = true, nullable = false)
+    private String idempotencyKey;
+
+    // ✅ One-to-one relationship with CardPaymentDetails
+    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CardPaymentDetails cardPaymentDetails;
+
+    // ✅ One-to-one relationship with BankPaymentDetails
+    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private BankPaymentDetails bankPaymentDetails;
+
+    // Future: add PayPalPaymentDetails etc.
+}

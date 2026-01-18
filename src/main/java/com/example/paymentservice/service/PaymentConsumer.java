@@ -26,9 +26,15 @@ public class PaymentConsumer {
     public void consumePayment(UUID paymentId) {
         log.info("Received payment event for paymentId={}", paymentId);
 
+        // Idempotency check
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
-        log.info("Payment retried from DB  for paymentId={}", payment);
+
+        if (payment.getStatus() != PaymentStatus.PENDING) {
+            log.info("Payment {} already processed with status {}. Ignoring.", paymentId, payment.getStatus());
+            return;
+        }
+
         boolean isFraudulent = fraudService.checkFraud(payment);
 
         payment.setStatus(
