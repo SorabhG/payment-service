@@ -108,11 +108,22 @@ public class PaymentService {
 
         return mapToResponse(payment);
     }
-    public void deletePayment(UUID id) {
-        if (!paymentRepository.existsById(id)) {
-            throw new RuntimeException("Payment not found");
+
+    //@Transactional
+    public PaymentResponse cancelPayment(UUID id) {
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        if (payment.getStatus() == PaymentStatus.SUCCESS) {
+            throw new IllegalStateException("Completed payments cannot be cancelled");
         }
-        paymentRepository.deleteById(id);
+        payment.setStatus(PaymentStatus.CANCELLED);
+        payment.setUpdatedAt(LocalDateTime.now());
+
+        paymentRepository.save(payment);
+        // Optional Kafka event
+        //paymentProducer.sendPaymentCancelledEvent(payment.getId());
+        return mapToResponse(payment);
     }
     public List<PaymentResponse> getAllPayments() {
         return paymentRepository.findAll()
