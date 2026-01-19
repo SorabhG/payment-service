@@ -20,6 +20,11 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
+    dlq-consumer:
+      group-id: payment-dlq-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.UUIDSerializer
@@ -37,6 +42,8 @@ spring:
 
 server:
   port: 8080
+
+
 
 logging:
   level:

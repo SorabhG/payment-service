@@ -9,6 +9,7 @@ import org.springframework.kafka.config.TopicBuilder;
 public class KafkaConfig {
 
     public static final String PAYMENT_TOPIC = "payments";
+    public static final String PAYMENT_DLQ_TOPIC = "payments_dlq";
 
     /**
      * Ensures the topic exists.
@@ -17,6 +18,13 @@ public class KafkaConfig {
     @Bean
     public NewTopic paymentsTopic() {
         return TopicBuilder.name(PAYMENT_TOPIC)
+                .partitions(1)
+                .replicas(1)
+                .build();
+    }
+    @Bean
+    public NewTopic paymentsDlqTopic() {
+        return TopicBuilder.name(PAYMENT_DLQ_TOPIC)
                 .partitions(1)
                 .replicas(1)
                 .build();

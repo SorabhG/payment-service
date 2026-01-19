@@ -1,0 +1,3 @@
+payment:
+  consumer:
+    processing-delay-ms: 7000
