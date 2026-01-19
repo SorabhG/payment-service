@@ -72,7 +72,6 @@ public class PaymentController {
     // DELETE – soft delete
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<PaymentResponse> deletePayment(@PathVariable UUID id) {
-        paymentService.cancelPayment(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(paymentService.cancelPayment(id));
     }
 }

@@ -1,7 +1,6 @@
 package com.example.paymentservice.service;
 
 
-
 import com.example.paymentservice.dto.BankPaymentRequest;
 import com.example.paymentservice.dto.CardPaymentRequest;
 import com.example.paymentservice.dto.PaymentResponse;
@@ -10,8 +9,6 @@ import com.example.paymentservice.entity.CardPaymentDetails;
 import com.example.paymentservice.entity.Payment;
 import com.example.paymentservice.entity.enums.PaymentStatus;
 import com.example.paymentservice.entity.enums.PaymentType;
-import com.example.paymentservice.repository.BankPaymentRepository;
-import com.example.paymentservice.repository.CardPaymentRepository;
 import com.example.paymentservice.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -28,8 +25,6 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final CardPaymentRepository cardRepo;
-    private final BankPaymentRepository bankRepo;
     private final PaymentProducer paymentProducer;
 
 

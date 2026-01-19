@@ -9,12 +9,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+
 public class PaymentConsumer {
 
     private final PaymentRepository paymentRepository;
@@ -27,6 +31,7 @@ public class PaymentConsumer {
             topics = "payments",
             groupId = "payment-group"
     )
+    @Transactional(propagation = REQUIRES_NEW)
     public void consumePayment(UUID paymentId) {
         //This delay is for demonstration, not production.
         if (processingDelayMs > 0) {
@@ -58,7 +63,6 @@ public class PaymentConsumer {
                 PaymentStatus.SUCCESS
         );
 
-        paymentRepository.save(payment);
 
         log.info("Payment {} processed with status {}", paymentId, payment.getStatus());
     }
