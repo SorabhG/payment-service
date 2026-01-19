@@ -68,7 +68,16 @@ public class GlobalExceptionHandler {
                         request
                 ));
     }
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleBadRequest(
+            BadRequestException ex,
+            HttpServletRequest request) {
 
+        log.warn("Bad request: {}", ex.getMessage());
+
+        return ResponseEntity.badRequest()
+                .body(buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request));
+    }
     private ApiErrorResponse buildError(
             HttpStatus status,
             String message,
