@@ -11,6 +11,10 @@ import org.springframework.util.backoff.FixedBackOff;
 
 @Configuration
 public class KafkaConsumerConfig {
+// This configuration ensures:
+// - Transient failures are retried with backoff
+// - Permanent failures are sent directly to DLQ
+// - Poison messages never block the consumer
 
     @Bean
     public DefaultErrorHandler errorHandler(

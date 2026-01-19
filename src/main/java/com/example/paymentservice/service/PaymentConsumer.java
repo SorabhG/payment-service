@@ -31,7 +31,7 @@ public class PaymentConsumer {
             topics = "payments",
             groupId = "payment-group"
     )
-    @Transactional(propagation = REQUIRES_NEW)
+    @Transactional
     public void consumePayment(UUID paymentId) {
         //This delay is for demonstration, not production.
         if (processingDelayMs > 0) {

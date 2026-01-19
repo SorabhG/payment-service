@@ -7,8 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
+import java.util.stream.Collectors;
+import java.util.Arrays;
 
 @Slf4j
 @RestControllerAdvice
@@ -54,20 +57,43 @@ public class GlobalExceptionHandler {
                 .body(buildError(HttpStatus.BAD_REQUEST, message, request));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleGeneric(
-            Exception ex,
+    // ✅ NEW HANDLER FOR INVALID ENUM / PARAM TYPE
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
             HttpServletRequest request) {
 
-        log.error("Unhandled exception", ex); //  THIS IS WHAT YOU WERE MISSING
+        String paramName = ex.getName();           // e.g. "status"
+        Object invalidValue = ex.getValue();       // e.g. "PENDING1"
+        Class<?> requiredType = ex.getRequiredType();
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(buildError(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        "Unexpected internal error",
-                        request
-                ));
+        String message;
+
+        if (requiredType != null && requiredType.isEnum()) {
+            String allowedValues = Arrays.stream(requiredType.getEnumConstants())
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", "));
+
+            message = String.format(
+                    "Invalid value '%s' for parameter '%s'. Allowed values are: %s",
+                    invalidValue,
+                    paramName,
+                    allowedValues
+            );
+        } else {
+            message = String.format(
+                    "Invalid value '%s' for parameter '%s'",
+                    invalidValue,
+                    paramName
+            );
+        }
+
+        log.warn("Type mismatch: {}", message);
+
+        return ResponseEntity.badRequest()
+                .body(buildError(HttpStatus.BAD_REQUEST, message, request));
     }
+
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiErrorResponse> handleBadRequest(
             BadRequestException ex,
@@ -78,6 +104,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest()
                 .body(buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request));
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleGeneric(
+            Exception ex,
+            HttpServletRequest request) {
+
+        log.error("Unhandled exception", ex);
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(buildError(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Unexpected internal error",
+                        request
+                ));
+    }
+
     private ApiErrorResponse buildError(
             HttpStatus status,
             String message,
@@ -92,4 +134,3 @@ public class GlobalExceptionHandler {
         );
     }
 }
-
