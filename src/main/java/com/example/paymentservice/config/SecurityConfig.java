@@ -21,11 +21,17 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // Actuator endpoints
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/payments/**")
-                        .hasAuthority("SCOPE_payment.read")
-                        .requestMatchers(HttpMethod.POST, "/payments/**")
-                        .hasAuthority("SCOPE_payment.write")
+
+                        // OpenAPI / Swagger endpoints
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
+                        // Payment endpoints
+                        .requestMatchers(HttpMethod.GET, "/payments/**").hasAuthority("SCOPE_payment.read")
+                        .requestMatchers(HttpMethod.POST, "/payments/**").hasAuthority("SCOPE_payment.write")
+
+                        // Any other requests
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));

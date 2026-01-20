@@ -20,6 +20,7 @@ This repository is intended to showcase **backend engineering best practices** s
 * **Layered Architecture** (Controller → Service → Repository)
 * **Validation Layer** for request DTOs
 * **Unit Tests & Integration Tests** with JUnit 5
+* **OpenAPI / Swagger Documentation** for APIs
 * **Docker & Docker Compose** for local environment
 
 ---
@@ -42,7 +43,7 @@ Client
 [RestController]
   |
   v
-[PaymentService] -----> [JPA Repository] -----> [PostgreSQL]
+[PaymentService] -----> [JPA Repository] -----> [PostgreSQL/H2]
   |
   v
 [Kafka Producer] -----> Kafka Topic -----> [Kafka Consumer] -----> [FraudService]
@@ -56,9 +57,10 @@ Client
 * Spring Boot 3.x
 * Spring Data JPA (Hibernate)
 * Apache Kafka
-* PostgreSQL (via Docker)
+* PostgreSQL / H2 (via Docker)
 * JUnit 5 & Mockito
 * Testcontainers (for integration tests, if enabled)
+* Springdoc OpenAPI 3.x for API documentation
 * Docker & Docker Compose
 
 ---
@@ -98,6 +100,24 @@ Returns the cancelled payment with updated status.
 
 ---
 
+## OpenAPI / Swagger Documentation
+
+Springdoc OpenAPI automatically generates interactive API docs for the service. Once the application is running:
+
+* Swagger UI: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+* OpenAPI JSON: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+
+Swagger UI allows you to:
+
+* Explore all endpoints interactively
+* See request/response models
+* Test APIs with headers such as `Idempotency-Key`
+* Add Bearer JWT token if configured in OpenAPI security scheme
+
+No annotations are strictly required on controllers for basic generation; Springdoc infers endpoints and DTOs automatically. Security headers (like OAuth2 JWT) need explicit configuration to appear in Swagger.
+
+---
+
 ## Domain Model
 
 Core entities:
@@ -125,8 +145,6 @@ Fraud detection is implemented as a deterministic business rule:
 // Payments greater than 15,000 are considered fraudulent
 boolean fraud = payment.getAmount().compareTo(BigDecimal.valueOf(15000)) > 0;
 ```
-
-This keeps behavior predictable and easy to test.
 
 ---
 
@@ -158,7 +176,7 @@ Focus:
 
 * Controller tests with `@WebMvcTest` / `@SpringBootTest`
 * JPA integration with H2/Testcontainers
-* End-to-end flow from REST → DB → Kafka (where enabled)
+* End-to-end flow from REST → DB → Kafka
 
 All tests use **JUnit 5**.
 
@@ -166,15 +184,26 @@ All tests use **JUnit 5**.
 
 ## Running Locally
 
+### Using Maven
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=local
+```
+
 ### Using Docker Compose
 
 ```bash
+docker build --no-cache -t oauth_payment-service .
+
+docker build -t auth-server:latest .
+
+docker build -t oauth_auth-server:latest .
 docker-compose up -d
 ```
 
 This starts:
 
-* PostgreSQL
+* PostgreSQL or H2 (depending on profile)
 * Kafka
 * Zookeeper
 * Payment Service
@@ -209,60 +238,35 @@ src/test/java
 
 ---
 
-## Design Principles Demonstrated
-
-* Separation of Concerns
-* Single Responsibility Principle
-* Idempotent APIs
-* Soft Delete Pattern
-* Event-Driven Architecture
-* Testable Business Logic
-* Clean Package Structure
-
----
-
 ## Reliability & Error Handling
 
-The Kafka consumer is configured with a production-grade error handling strategy using **Spring Kafka DefaultErrorHandler**.
+Kafka consumer uses **Spring Kafka DefaultErrorHandler**.
 
 ### Retry with Backoff
 
-* Retries are enabled using `FixedBackOff`:
-
-    * **Backoff interval:** 2000 ms (2 seconds)
-    * **Max attempts:** 3 retries
-* This allows the consumer to recover from **transient failures** (e.g., temporary DB or network issues) before giving up.
+* 3 retries with 2s delay (FixedBackOff)
+* Handles transient errors before failing
 
 ### Dead Letter Queue (DLQ)
 
-* Failed messages are published to a dedicated **`payments-dlq`** topic using `DeadLetterPublishingRecoverer`.
-* Poison messages can be:
-
-    * Inspected
-    * Replayed
-    * Manually fixed and reprocessed
+* Messages failing after retries go to `payments-dlq`
+* Supports inspection, replay, or manual fix
 
 ### Non-Retryable Exceptions
-
-Permanent business failures are excluded from retry and sent **directly to DLQ**:
 
 * `IllegalArgumentException`
 * `PaymentNotFoundException`
 
-This design ensures:
-
-* No infinite retry loops
-* Clear separation of transient vs permanent failures
-* Operational observability and safe recovery
+Ensures safe, observable, production-ready processing.
 
 ---
 
 ## Future Improvements
 
-* Retry & circuit breaker using Resilience4j
+* Resilience4j for circuit breaker & retry
 * Schema registry for Kafka
 * Distributed tracing (OpenTelemetry)
-* API documentation with OpenAPI / Swagger
+* Enhanced OpenAPI security configuration
 * Caching for read-heavy endpoints
 
 ---
