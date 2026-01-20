@@ -261,6 +261,72 @@ Ensures safe, observable, production-ready processing.
 
 ---
 
+## UI Integration Design (React + OAuth2)
+
+This service is designed to integrate seamlessly with a modern Single Page Application (SPA) such as **React** secured via **OAuth2 / OpenID Connect**.
+
+### High-Level Flow
+
+1. User accesses the React application
+2. React redirects the user to **Auth Server** for login (Authorization Code Flow with PKCE)
+3. Auth Server authenticates the user and returns an **access token (JWT)**
+4. React stores the token securely (memory or secure storage)
+5. React calls Payment Service APIs with:
+
+```
+Authorization: Bearer <access_token>
+```
+
+6. Payment Service validates the JWT and enforces scopes:
+
+| UI Action      | Required Scope |
+| -------------- | -------------- |
+| View payments  | payment.read   |
+| Create payment | payment.write  |
+| Cancel payment | payment.write  |
+
+### Architecture Options
+
+**Direct Integration** (Simple):
+
+```
+React UI  ---> Auth Server
+React UI  ---> Payment Service
+```
+
+**With API Gateway / BFF** (Enterprise):
+
+```
+React UI ---> API Gateway / BFF ---> Payment Service
+                  |
+                  v
+             Auth Server
+```
+
+The API Gateway can centralize:
+
+* Token validation
+* Rate limiting
+* Routing
+* Logging and monitoring
+
+### Backend Readiness
+
+The current Payment Service already supports:
+
+* OAuth2 Resource Server
+* JWT validation
+* Scope-based authorization
+* OpenAPI documentation for UI consumption
+
+This allows UI integration with **minimal backend changes**, mainly:
+
+* CORS configuration
+* OpenAPI security scheme configuration
+* Optional refresh token support
+
+---
+
 ## Future Improvements
 
 * Resilience4j for circuit breaker & retry
