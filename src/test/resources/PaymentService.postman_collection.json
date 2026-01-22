@@ -1,0 +1,324 @@
+{
+	"info": {
+		"_postman_id": "659c572b-05df-42ff-9b60-126093234f14",
+		"name": "PaymentService",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GenerateToken",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the JSON response\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"// Save the access_token to environment variable\r",
+							"pm.environment.set(\"access_token\", jsonData.access_token);\r",
+							"\r",
+							"// Optional: also save refresh token if needed\r",
+							"pm.environment.set(\"refresh_token\", jsonData.refresh_token);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "payment-client",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "payment-secret",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "payment.read payment.write",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:9000/oauth2/token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9000",
+					"path": [
+						"oauth2",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getPayment",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJraWQiOiJkMDMyMWMwNS1kNWNiLTRhNTctYjE2NS01MTU0ODM2ZTRkYzIiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJwYXltZW50LWNsaWVudCIsImF1ZCI6InBheW1lbnQtY2xpZW50IiwibmJmIjoxNzY4NzExNzM5LCJzY29wZSI6WyJwYXltZW50LndyaXRlIiwicGF5bWVudC5yZWFkIl0sImlzcyI6Imh0dHA6Ly9hdXRoLXNlcnZlcjo5MDAwIiwiZXhwIjoxNzY4NzEyMDM5LCJpYXQiOjE3Njg3MTE3MzksImp0aSI6IjEzYmY1MDJhLWE5MTYtNGMyMi1hM2ZjLTcxOTNkNmFkYWNiOCJ9.bH2LAGWlwKHWj0JmbYf9N-96ere8T4eEP55zwcflbrdWXwC1PEkTR9hWfSEIeZQWTrL3J9kvGYGb70QMm4s6KqiACb-6Rc2BAzsBun8Mfhw1RVr5UVSIrgNQEzqLJgAUnskTJxpcMkxVO-kuJde3aMFg0gswLUb32BdfG-TOfRI-OAL7d0qznXAXQKSBLxWy1FG5J9sfjjwD1M9IvT679_leocbPxQASIOzc5esTk8YzCA2qiOP8mvNnCXIHGoxbOftJiNrZYCjkrZay3ii5DNUX_hX3ZF3DodBId-5UugWIA88h8MaUpzf9ChRUMB1v6WEtl8k69kB62xWCmF90eA",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/payments/5eae1dc7-4dce-4057-a3fa-80f3da28405a",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"payments",
+						"5eae1dc7-4dce-4057-a3fa-80f3da28405a"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getAllPayments",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJraWQiOiJkMDMyMWMwNS1kNWNiLTRhNTctYjE2NS01MTU0ODM2ZTRkYzIiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJwYXltZW50LWNsaWVudCIsImF1ZCI6InBheW1lbnQtY2xpZW50IiwibmJmIjoxNzY4NzExNzM5LCJzY29wZSI6WyJwYXltZW50LndyaXRlIiwicGF5bWVudC5yZWFkIl0sImlzcyI6Imh0dHA6Ly9hdXRoLXNlcnZlcjo5MDAwIiwiZXhwIjoxNzY4NzEyMDM5LCJpYXQiOjE3Njg3MTE3MzksImp0aSI6IjEzYmY1MDJhLWE5MTYtNGMyMi1hM2ZjLTcxOTNkNmFkYWNiOCJ9.bH2LAGWlwKHWj0JmbYf9N-96ere8T4eEP55zwcflbrdWXwC1PEkTR9hWfSEIeZQWTrL3J9kvGYGb70QMm4s6KqiACb-6Rc2BAzsBun8Mfhw1RVr5UVSIrgNQEzqLJgAUnskTJxpcMkxVO-kuJde3aMFg0gswLUb32BdfG-TOfRI-OAL7d0qznXAXQKSBLxWy1FG5J9sfjjwD1M9IvT679_leocbPxQASIOzc5esTk8YzCA2qiOP8mvNnCXIHGoxbOftJiNrZYCjkrZay3ii5DNUX_hX3ZF3DodBId-5UugWIA88h8MaUpzf9ChRUMB1v6WEtl8k69kB62xWCmF90eA",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/payments",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "IdempodentBankPayment",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Idempotency-Key",
+						"value": "9fbc5c2e-34b2-4d2e-8a1b-91a5bff10c1b"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"amount\": 100.00,\n  \"currency\": \"AUD\",\n  \"accountNumber\": \"12345678\",\n  \"bsb\": \"062000\",\n  \"accountHolderName\": \"Sourabh G\",\n  \"bankName\": \"Commonwealth Bank\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/payments/bank",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"payments",
+						"bank"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdatePayment",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer <YOUR_JWT_TOKEN>",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/payments/61afd6ac-ff35-4e65-abdb-b89c5291d4c8?status=PENDING",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"payments",
+						"61afd6ac-ff35-4e65-abdb-b89c5291d4c8"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "PENDING"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeletePayment",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer <YOUR_JWT_TOKEN>",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/payments/5eae1dc7-4dce-4057-a3fa-80f3da28405a/cancel",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"payments",
+						"5eae1dc7-4dce-4057-a3fa-80f3da28405a",
+						"cancel"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "IdempodentCardPayment",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"warning": "This is a duplicate header and will be overridden by the Authorization header generated by Postman.",
+						"key": "Authorization",
+						"value": "Bearer <JWT>"
+					},
+					{
+						"key": "Idempotency-Key",
+						"value": "7c3659e0-c3df-4b40-b53f-a5996d8bb11e"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"amount\": 180.75,\n  \"currency\": \"AUD\",\n  \"cardNumber\": \"4111111111111111\",\n  \"cardHolderName\": \"Sorabh G\",\n  \"expiryMonth\": 12,\n  \"expiryYear\": 2027,\n  \"cvv\": \"1231\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/payments/card",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"payments",
+						"card"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
